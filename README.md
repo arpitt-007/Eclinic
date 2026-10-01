@@ -53,3 +53,15 @@ static/css/   site styles
 ## Production settings
 
 Configure via environment variables: `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=0`, `DJANGO_ALLOWED_HOSTS=example.com`. Run `python manage.py collectstatic` and serve `staticfiles/` and `media/` from your web server.
+
+## Deploying to Render (no external database)
+
+`render.yaml` deploys a single free web service. There is no database server: on every start the app creates a fresh SQLite file and loads the accounts defined in `clinic/management/commands/seed_demo.py`.
+
+1. Push this repo to GitHub.
+2. In Render: **New → Blueprint** → pick the repo → **Apply**.
+3. The admin username is `admin`; its password is the generated `ADMIN_PASSWORD` under the service's **Environment** tab.
+
+To add or change accounts, edit the `DOCTORS` list (or the patient block) in `seed_demo.py` and push.
+
+> Bookings, sign-ups and profile edits made on the live site are **lost whenever the server restarts** (each deploy, and after ~15 min of inactivity on the free plan). Use a real database if you need data to persist.

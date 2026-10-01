@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -89,6 +90,17 @@ class Command(BaseCommand):
                 patient=patient, doctor=doctors[0], date=today + datetime.timedelta(days=3),
                 time=datetime.time(15, 0), symptoms='Follow-up on throat infection.',
             )
+
+        # Site admin for /admin/. Only created when ADMIN_PASSWORD is set, so the
+        # password never lives in the code.
+        admin_password = os.environ.get('ADMIN_PASSWORD')
+        if admin_password:
+            admin, _ = User.objects.get_or_create(
+                username='admin', defaults={'email': 'admin@eclinic.local', 'first_name': 'Admin'}
+            )
+            admin.is_staff = admin.is_superuser = True
+            admin.set_password(admin_password)
+            admin.save()
 
         self.stdout.write(self.style.SUCCESS(
             f'Demo data ready. Log in as "patient" or "dr_sharma" (password: {DEMO_PASSWORD}).'
