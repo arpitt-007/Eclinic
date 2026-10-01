@@ -54,14 +54,16 @@ static/css/   site styles
 
 Configure via environment variables: `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=0`, `DJANGO_ALLOWED_HOSTS=example.com`. Run `python manage.py collectstatic` and serve `staticfiles/` and `media/` from your web server.
 
-## Deploying to Render (no external database)
+## Deploying to Vercel (no external database)
 
-`render.yaml` deploys a single free web service. There is no database server: on every start the app creates a fresh SQLite file and loads the accounts defined in `clinic/management/commands/seed_demo.py`.
+The app runs as a Vercel serverless Python function (`vercel.json` → `eclinic/wsgi.py`). There is no database server: on every cold start it creates a SQLite file in `/tmp` and loads the accounts defined in `clinic/management/commands/seed_demo.py`. Logins are kept in signed cookies, and WhiteNoise serves static files straight from the source folders.
 
-1. Push this repo to GitHub.
-2. In Render: **New → Blueprint** → pick the repo → **Apply**.
-3. The admin username is `admin`; its password is the generated `ADMIN_PASSWORD` under the service's **Environment** tab.
+1. Push this repo to GitHub and import it at https://vercel.com/new (Framework preset: **Other**), or run `vercel --prod` from this folder.
+2. In **Project → Settings → Environment Variables** add:
+   - `DJANGO_SECRET_KEY` — required, a long random string
+   - `ADMIN_PASSWORD` — optional, password for the built-in `admin` account
+3. Redeploy so the variables take effect.
 
 To add or change accounts, edit the `DOCTORS` list (or the patient block) in `seed_demo.py` and push.
 
-> Bookings, sign-ups and profile edits made on the live site are **lost whenever the server restarts** (each deploy, and after ~15 min of inactivity on the free plan). Use a real database if you need data to persist.
+> Bookings, sign-ups and profile edits made on the live site are **temporary**: each serverless instance has its own copy of the data, which resets on every cold start and redeploy. Uploaded doctor photos are not kept either. Use a hosted database and file storage if you need data to persist.

@@ -11,33 +11,37 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import tempfile
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY', 'django-insecure-dev-only-change-me-in-production'
-)
+# Vercel sets VERCEL=1 in its build and runtime environments.
+ON_VERCEL = bool(os.environ.get('VERCEL'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
+DEBUG = os.environ.get('DJANGO_DEBUG', '0' if ON_VERCEL else '1') == '1'
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    if not DEBUG:
+        # Sessions are signed with this key, so a guessable default would let
+        # anyone forge a login.
+        raise ImproperlyConfigured('Set the DJANGO_SECRET_KEY environment variable.')
+    SECRET_KEY = 'django-insecure-dev-only-change-me-in-production'
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 CSRF_TRUSTED_ORIGINS = [
     origin for origin in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',') if origin
 ]
-
-# Render sets this automatically to the service's public hostname.
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
+if ON_VERCEL:
+    ALLOWED_HOSTS.append('.vercel.app')
+    CSRF_TRUSTED_ORIGINS.append('https://*.vercel.app')
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -93,14 +97,22 @@ WSGI_APPLICATION = 'eclinic.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# A local SQLite file. On Render it is rebuilt from code on every start
-# (see `seed_demo`), so data entered on the live site is temporary.
+# A local SQLite file. On Vercel only the temp dir is writable, and the file is
+# rebuilt from code on every cold start (see eclinic/wsgi.py), so data entered
+# on the live site is temporary.
+RUNTIME_DIR = Path(tempfile.gettempdir()) / 'eclinic' if ON_VERCEL else BASE_DIR
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': RUNTIME_DIR / 'db.sqlite3',
     }
 }
+
+# Each Vercel instance has its own database file, so keep logins in signed
+# cookies rather than the database; they then work on whichever instance
+# serves the next request.
+if ON_VERCEL:
+    SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 
 # Password validation
@@ -142,15 +154,14 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
     'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
-    # Hashed/compressed files need `collectstatic`, so only use them in production.
-    'staticfiles': {
-        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage' if DEBUG
-        else 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    },
+    # Vercel has no collectstatic step, so serve plain files straight from the
+    # app/static folders instead of the hashed copies collectstatic produces.
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
 }
+WHITENOISE_USE_FINDERS = True
 
 MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = RUNTIME_DIR / 'media'
 
 AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'login'
