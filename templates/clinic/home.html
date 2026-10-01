@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Online doctor consultations{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="eyebrow">Your health, online</span>
+        <h1 class="display-5 mt-2 mb-3">Consult trusted doctors from anywhere, anytime.</h1>
+        <p class="lead mb-4">Book video or in-clinic appointments with verified specialists, receive digital prescriptions, and keep your medical history in one secure place.</p>
+        <form action="{% url 'doctor_list' %}" class="search-bar d-flex align-items-center mb-4">
+          <i class="bi bi-search text-muted ms-3"></i>
+          <input name="q" class="form-control" placeholder="Search doctors, specialities…" aria-label="Search doctors">
+          <button class="btn btn-primary px-4">Search</button>
+        </form>
+        <div class="d-flex flex-wrap gap-4 small text-muted">
+          <span><i class="bi bi-patch-check-fill text-primary me-1"></i>Verified doctors</span>
+          <span><i class="bi bi-camera-video-fill text-primary me-1"></i>Video consults</span>
+          <span><i class="bi bi-file-earmark-medical-fill text-primary me-1"></i>e-Prescriptions</span>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-card">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <strong>E-Clinic at a glance</strong>
+            <span class="badge rounded-pill text-bg-light"><span class="text-success">●</span> Live</span>
+          </div>
+          <div class="row g-3">
+            <div class="col-6"><div class="stat-tile"><div class="value">{{ stats.doctors }}</div><div class="label">Doctors</div></div></div>
+            <div class="col-6"><div class="stat-tile"><div class="value">{{ stats.specialities }}</div><div class="label">Specialities</div></div></div>
+            <div class="col-6"><div class="stat-tile"><div class="value">{{ stats.patients }}</div><div class="label">Registered patients</div></div></div>
+            <div class="col-6"><div class="stat-tile"><div class="value">{{ stats.consultations }}</div><div class="label">Consultations done</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container py-5">
+  <div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+      <span class="eyebrow">Specialities</span>
+      <h2 class="section-title h3 mt-1 mb-0">Find care for every need</h2>
+    </div>
+    <a href="{% url 'doctor_list' %}" class="small fw-semibold">View all doctors →</a>
+  </div>
+  <div class="row g-3">
+    {% for spec in specializations %}
+      <div class="col-6 col-md-4 col-lg-2">
+        <a class="card card-hover spec-card h-100" href="{% url 'doctor_list' %}?specialization={{ spec.pk }}">
+          <div class="emoji mb-2">{{ spec.icon|default:"🩺" }}</div>
+          <div class="fw-semibold small">{{ spec.name }}</div>
+          <div class="text-muted small">{{ spec.n }} doctor{{ spec.n|pluralize }}</div>
+        </a>
+      </div>
+    {% empty %}
+      <p class="text-muted">No specialities yet. Run <code>python manage.py seed_demo</code> to load demo data.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="bg-white border-top border-bottom py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="eyebrow">How it works</span>
+      <h2 class="section-title h3 mt-1">Get care in three simple steps</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4 d-flex gap-3">
+        <div class="step-num">1</div>
+        <div><h3 class="h6 fw-bold">Choose a doctor</h3><p class="text-muted small mb-0">Browse by speciality, experience and fee to find the right doctor for you.</p></div>
+      </div>
+      <div class="col-md-4 d-flex gap-3">
+        <div class="step-num">2</div>
+        <div><h3 class="h6 fw-bold">Book a slot</h3><p class="text-muted small mb-0">Pick a date and a free time slot, and choose a video or in-clinic visit.</p></div>
+      </div>
+      <div class="col-md-4 d-flex gap-3">
+        <div class="step-num">3</div>
+        <div><h3 class="h6 fw-bold">Consult & get your Rx</h3><p class="text-muted small mb-0">Join the video call from your dashboard and receive a printable e-prescription.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if doctors %}
+<section class="container py-5">
+  <div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+      <span class="eyebrow">Our doctors</span>
+      <h2 class="section-title h3 mt-1 mb-0">Meet some of our specialists</h2>
+    </div>
+  </div>
+  <div class="row g-4">
+    {% for doctor in doctors %}
+      <div class="col-md-6 col-lg-3">{% include "clinic/_doctor_card.html" %}</div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="container pb-4">
+  <div class="rounded-4 p-4 p-md-5 text-white d-md-flex align-items-center justify-content-between gap-4" style="background: linear-gradient(120deg, var(--brand-dark), var(--brand));">
+    <div>
+      <h2 class="h4 fw-bold mb-1">Are you a doctor?</h2>
+      <p class="mb-md-0 opacity-75">Join E-Clinic to reach more patients and run your practice online.</p>
+    </div>
+    <a href="{% url 'signup_doctor' %}" class="btn btn-light fw-semibold px-4">Join as a doctor</a>
+  </div>
+</section>
+{% endblock %}

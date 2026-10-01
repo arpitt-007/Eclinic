@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load clinic_tags %}
+{% block title %}Doctor dashboard{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold mb-0">Good day, Dr. {{ user.last_name|default:user.first_name }}</h1>
+      <p class="text-muted mb-0">{% now "l, d F Y" %}</p>
+    </div>
+    <a href="{% url 'profile' %}" class="btn btn-outline-primary"><i class="bi bi-sliders me-2"></i>Availability &amp; profile</a>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="stat-tile"><div class="value">{{ today_appts|length }}</div><div class="label">Today</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat-tile"><div class="value text-warning">{{ counts.pending }}</div><div class="label">Pending requests</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat-tile"><div class="value">{{ counts.upcoming }}</div><div class="label">Upcoming</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat-tile"><div class="value text-success">{{ counts.completed }}</div><div class="label">Completed</div></div></div>
+  </div>
+
+  {% if today_appts %}
+  <div class="card mb-4 border-primary-subtle">
+    <div class="card-header bg-white border-0 pt-4 px-4"><h2 class="h5 fw-bold mb-0"><i class="bi bi-sun me-2 text-warning"></i>Today's schedule</h2></div>
+    <div class="card-body px-4">
+      <div class="list-group list-group-flush">
+        {% for appt in today_appts %}
+          <a href="{{ appt.get_absolute_url }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 px-0">
+            <span class="fw-bold text-primary" style="min-width: 80px">{{ appt.time|time:"g:i A" }}</span>
+            <span class="avatar avatar-sm">{{ appt.patient.user|initials }}</span>
+            <span class="flex-grow-1">{{ appt.patient }} <span class="text-muted small">— {{ appt.symptoms|truncatechars:60 }}</span></span>
+            <span class="badge rounded-pill text-bg-{{ appt.status_color }}">{{ appt.get_status_display }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card mb-4">
+    <div class="card-header bg-white border-0 pt-4 px-4"><h2 class="h5 fw-bold mb-0">Upcoming appointments</h2></div>
+    <div class="card-body px-4">
+      {% include "clinic/_appt_table.html" with appts=upcoming empty_text="No upcoming appointments." %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-white border-0 pt-4 px-4"><h2 class="h5 fw-bold mb-0">Past consultations</h2></div>
+    <div class="card-body px-4">
+      {% include "clinic/_appt_table.html" with appts=past empty_text="No past consultations yet." %}
+    </div>
+  </div>
+</div>
+{% endblock %}

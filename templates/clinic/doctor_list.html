@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Find a doctor{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h1 class="h3 fw-bold mb-1">Find a doctor</h1>
+  <p class="text-muted mb-4">{{ doctors|length }} doctor{{ doctors|length|pluralize }} available</p>
+  <form class="row g-2 mb-4">
+    <div class="col-md-6">
+      <input name="q" value="{{ q }}" class="form-control" placeholder="Search by name, speciality or qualification">
+    </div>
+    <div class="col-md-4">
+      <select name="specialization" class="form-select" onchange="this.form.submit()">
+        <option value="">All specialities</option>
+        {% for spec in specializations %}
+          <option value="{{ spec.pk }}" {% if selected_spec == spec.pk|stringformat:"d" %}selected{% endif %}>{{ spec.icon }} {{ spec.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-primary"><i class="bi bi-search me-1"></i>Search</button>
+    </div>
+  </form>
+  <div class="row g-4">
+    {% for doctor in doctors %}
+      <div class="col-md-6 col-lg-4 col-xl-3">{% include "clinic/_doctor_card.html" %}</div>
+    {% empty %}
+      <div class="col-12">
+        <div class="card"><div class="card-body text-center py-5 text-muted">
+          <i class="bi bi-search fs-1 d-block mb-2"></i>No doctors match your search. <a href="{% url 'doctor_list' %}">Clear filters</a>
+        </div></div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

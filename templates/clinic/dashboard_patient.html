@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold mb-0">Hello, {{ user.first_name|default:user.username }} 👋</h1>
+      <p class="text-muted mb-0">Here's an overview of your consultations.</p>
+    </div>
+    <a href="{% url 'doctor_list' %}" class="btn btn-primary"><i class="bi bi-calendar-plus me-2"></i>Book appointment</a>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="stat-tile"><div class="value">{{ counts.upcoming }}</div><div class="label">Upcoming</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat-tile"><div class="value">{{ counts.pending }}</div><div class="label">Awaiting confirmation</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat-tile"><div class="value">{{ counts.completed }}</div><div class="label">Completed</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat-tile"><div class="value">{{ counts.total }}</div><div class="label">Total bookings</div></div></div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header bg-white border-0 pt-4 px-4"><h2 class="h5 fw-bold mb-0">Upcoming appointments</h2></div>
+    <div class="card-body px-4">
+      {% include "clinic/_appt_table.html" with appts=upcoming empty_text="No upcoming appointments. Find a doctor to book one." %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-white border-0 pt-4 px-4"><h2 class="h5 fw-bold mb-0">History &amp; prescriptions</h2></div>
+    <div class="card-body px-4">
+      {% include "clinic/_appt_table.html" with appts=past empty_text="Your past consultations will appear here." %}
+    </div>
+  </div>
+</div>
+{% endblock %}

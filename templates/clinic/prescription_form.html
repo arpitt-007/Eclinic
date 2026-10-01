@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Prescription{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width: 760px">
+  <a href="{{ appt.get_absolute_url }}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> Back to appointment</a>
+  <h1 class="h3 fw-bold mt-2 mb-1">Prescription</h1>
+  <p class="text-muted mb-4">For {{ appt.patient }} · {{ appt.date|date:"d M Y" }} {{ appt.time|time:"g:i A" }}</p>
+  <div class="card">
+    <div class="card-body p-4">
+      <div class="alert alert-light border small"><strong>Symptoms:</strong> {{ appt.symptoms }}</div>
+      <form method="post" novalidate>{% csrf_token %}
+        {% include "partials/form.html" %}
+        <button class="btn btn-primary px-4"><i class="bi bi-save me-2"></i>Save &amp; mark completed</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

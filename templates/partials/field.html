@@ -1,0 +1,31 @@
+{% load clinic_tags %}
+{% with wt=field|widget_type %}
+<div class="mb-3">
+  {% if wt == 'CheckboxInput' %}
+    <div class="form-check">
+      {{ field|add_class:"form-check-input" }}
+      <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    </div>
+  {% elif wt == 'RadioSelect' %}
+    <label class="form-label fw-semibold">{{ field.label }}</label>
+    <div class="radio-pills">
+      {% for radio in field %}
+        <label class="radio-pill">
+          {{ radio.tag }}<span>{{ radio.choice_label }}</span>
+        </label>
+      {% empty %}
+        <p class="text-muted small mb-0">No options available.</p>
+      {% endfor %}
+    </div>
+  {% else %}
+    <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% if wt == 'Select' %}
+      {{ field|add_class:"form-select" }}
+    {% else %}
+      {{ field|add_class:"form-control" }}
+    {% endif %}
+  {% endif %}
+  {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
+  {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+</div>
+{% endwith %}

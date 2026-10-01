@@ -1,0 +1,52 @@
+{% load clinic_tags %}
+<div class="table-responsive">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>{% if user.is_doctor %}Patient{% else %}Doctor{% endif %}</th>
+        <th>Date &amp; time</th>
+        <th>Mode</th>
+        <th>Status</th>
+        <th class="text-end"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for appt in appts %}
+        <tr>
+          <td>
+            {% if user.is_doctor %}
+              <div class="d-flex align-items-center gap-2">
+                <span class="avatar avatar-sm">{{ appt.patient.user|initials }}</span>
+                <div>
+                  <div class="fw-semibold">{{ appt.patient }}</div>
+                  <div class="small text-muted text-truncate" style="max-width: 220px">{{ appt.symptoms }}</div>
+                </div>
+              </div>
+            {% else %}
+              <div class="fw-semibold">{{ appt.doctor }}</div>
+              <div class="small text-muted">{{ appt.doctor.specialization }}</div>
+            {% endif %}
+          </td>
+          <td class="text-nowrap">{{ appt.date|date:"d M Y" }}<br><span class="small text-muted">{{ appt.time|time:"g:i A" }}</span></td>
+          <td class="small">{% if appt.mode == 'video' %}<i class="bi bi-camera-video me-1"></i>Video{% else %}<i class="bi bi-hospital me-1"></i>Clinic{% endif %}</td>
+          <td><span class="badge rounded-pill text-bg-{{ appt.status_color }}">{{ appt.get_status_display }}</span></td>
+          <td class="text-end text-nowrap">
+            {% if user.is_doctor and appt.status == 'pending' %}
+              <form method="post" action="{% url 'appointment_action' appt.pk 'confirm' %}" class="d-inline">{% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button class="btn btn-sm btn-primary" title="Confirm"><i class="bi bi-check-lg"></i></button>
+              </form>
+              <form method="post" action="{% url 'appointment_action' appt.pk 'reject' %}" class="d-inline">{% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button class="btn btn-sm btn-outline-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
+              </form>
+            {% endif %}
+            <a href="{{ appt.get_absolute_url }}" class="btn btn-sm btn-outline-secondary">View</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-4">{{ empty_text|default:"Nothing here yet." }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

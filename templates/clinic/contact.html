@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Contact{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-5">
+    <div class="col-lg-5">
+      <span class="eyebrow">Get in touch</span>
+      <h1 class="h2 fw-bold mt-2">We're here to help</h1>
+      <p class="text-muted mb-4">Questions about bookings, payments or joining as a doctor? Send us a message and our support team will reply within one business day.</p>
+      <ul class="list-unstyled">
+        <li class="mb-3 d-flex gap-3"><span class="step-num"><i class="bi bi-envelope"></i></span><div><div class="fw-semibold">Email</div><div class="text-muted small">support@eclinic.local</div></div></li>
+        <li class="mb-3 d-flex gap-3"><span class="step-num"><i class="bi bi-telephone"></i></span><div><div class="fw-semibold">Phone</div><div class="text-muted small">+91 98765 43210</div></div></li>
+        <li class="d-flex gap-3"><span class="step-num"><i class="bi bi-geo-alt"></i></span><div><div class="fw-semibold">Office</div><div class="text-muted small">2nd Floor, Health Tower, Bengaluru</div></div></li>
+      </ul>
+    </div>
+    <div class="col-lg-7">
+      <div class="card"><div class="card-body p-4">
+        <form method="post" novalidate>{% csrf_token %}
+          {% include "partials/form.html" %}
+          <button class="btn btn-primary px-4"><i class="bi bi-send me-2"></i>Send message</button>
+        </form>
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

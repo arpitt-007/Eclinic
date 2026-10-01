@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width: 900px">
+  <span class="eyebrow">About E-Clinic</span>
+  <h1 class="display-6 fw-bold mt-2 mb-3">Healthcare that fits into your life.</h1>
+  <p class="lead text-muted mb-5">E-Clinic connects patients with qualified doctors through simple online booking, secure video consultations and digital prescriptions — so you can get expert care without the waiting room.</p>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card h-100"><div class="card-body p-4">
+        <i class="bi bi-shield-check fs-2 text-primary"></i>
+        <h2 class="h6 fw-bold mt-3">Verified doctors</h2>
+        <p class="small text-muted mb-0">Every doctor's credentials are reviewed by our team before they can accept consultations.</p>
+      </div></div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100"><div class="card-body p-4">
+        <i class="bi bi-lock fs-2 text-primary"></i>
+        <h2 class="h6 fw-bold mt-3">Private by design</h2>
+        <p class="small text-muted mb-0">Your records are visible only to you and the doctors you consult with.</p>
+      </div></div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100"><div class="card-body p-4">
+        <i class="bi bi-file-earmark-medical fs-2 text-primary"></i>
+        <h2 class="h6 fw-bold mt-3">Digital records</h2>
+        <p class="small text-muted mb-0">Access every prescription and past consultation from your dashboard, any time.</p>
+      </div></div>
+    </div>
+  </div>
+  <div class="alert alert-warning mt-5 mb-0"><i class="bi bi-exclamation-triangle me-2"></i>E-Clinic is not for emergencies. If you are experiencing a medical emergency, call your local emergency number right away.</div>
+</div>
+{% endblock %}

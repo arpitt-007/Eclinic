@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load clinic_tags %}
+{% block title %}{{ doctor }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <a href="{% url 'doctor_list' %}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> All doctors</a>
+  <div class="row g-4 mt-1">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-body p-4">
+          <div class="d-flex gap-4 align-items-center mb-4">
+            {% if doctor.photo %}<img src="{{ doctor.photo.url }}" alt="" class="avatar avatar-lg">
+            {% else %}<span class="avatar avatar-lg">{{ doctor.user|initials }}</span>{% endif %}
+            <div>
+              <h1 class="h3 fw-bold mb-1">{{ doctor }}</h1>
+              <div class="text-primary fw-semibold">{{ doctor.specialization.icon }} {{ doctor.specialization|default:"General" }}</div>
+              <div class="text-muted small">{{ doctor.qualification }}</div>
+            </div>
+          </div>
+          <div class="row g-3 mb-4">
+            <div class="col-sm-4"><div class="stat-tile"><div class="value">{{ doctor.experience_years }}+</div><div class="label">Years experience</div></div></div>
+            <div class="col-sm-4"><div class="stat-tile"><div class="value">₹{{ doctor.consultation_fee|floatformat:0 }}</div><div class="label">Consultation fee</div></div></div>
+            <div class="col-sm-4"><div class="stat-tile"><div class="value">{{ doctor.slot_minutes }}<small class="fs-6"> min</small></div><div class="label">Per consultation</div></div></div>
+          </div>
+          <h2 class="h6 fw-bold">About</h2>
+          <p class="text-muted">{{ doctor.bio|default:"This doctor hasn't added a bio yet."|linebreaksbr }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card sticky-lg-top" style="top: 90px">
+        <div class="card-body p-4">
+          <h2 class="h6 fw-bold mb-3">Availability</h2>
+          <p class="mb-1"><i class="bi bi-clock me-2 text-primary"></i>{{ doctor.available_from|time:"g:i A" }} – {{ doctor.available_to|time:"g:i A" }}</p>
+          <p class="text-muted small mb-4"><i class="bi bi-calendar-week me-2"></i>Bookable up to 60 days ahead</p>
+          {% if not user.is_authenticated or user.is_patient %}
+            <a href="{% url 'book_appointment' doctor.pk %}" class="btn btn-primary w-100 py-2"><i class="bi bi-calendar-plus me-2"></i>Book appointment</a>
+          {% else %}
+            <p class="small text-muted mb-0">Log in with a patient account to book.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

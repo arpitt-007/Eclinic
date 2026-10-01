@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load clinic_tags %}
+{% block title %}Book with {{ doctor }}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width: 860px">
+  <a href="{{ doctor.get_absolute_url }}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> Back to profile</a>
+  <h1 class="h3 fw-bold mt-2 mb-4">Book an appointment</h1>
+  <div class="row g-4">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body p-4">
+          <form method="post" id="booking-form" novalidate>{% csrf_token %}
+            {% for error in form.non_field_errors %}<div class="alert alert-danger py-2">{{ error }}</div>{% endfor %}
+            {% with field=form.date %}{% include "partials/field.html" %}{% endwith %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Available slots on {{ date|date:"D, d M Y" }}</label>
+              {% if form.time.field.choices %}
+                <div class="radio-pills">
+                  {% for radio in form.time %}
+                    <label class="radio-pill">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="alert alert-light border mb-0"><i class="bi bi-calendar-x me-2"></i>No free slots on this day. Please choose another date.</div>
+              {% endif %}
+              {% for error in form.time.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+            {% with field=form.mode %}{% include "partials/field.html" %}{% endwith %}
+            {% with field=form.symptoms %}{% include "partials/field.html" %}{% endwith %}
+            <button class="btn btn-primary px-4 py-2" {% if not form.time.field.choices %}disabled{% endif %}>
+              <i class="bi bi-check2-circle me-1"></i>Confirm booking
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body p-4">
+          <div class="d-flex gap-3 align-items-center mb-3">
+            <span class="avatar">{{ doctor.user|initials }}</span>
+            <div>
+              <div class="fw-bold">{{ doctor }}</div>
+              <div class="small text-primary">{{ doctor.specialization }}</div>
+            </div>
+          </div>
+          <ul class="list-unstyled small text-muted mb-0">
+            <li class="mb-2"><i class="bi bi-mortarboard me-2"></i>{{ doctor.qualification }}</li>
+            <li class="mb-2"><i class="bi bi-clock me-2"></i>{{ doctor.slot_minutes }} min consultation</li>
+            <li><i class="bi bi-currency-rupee me-2"></i>{{ doctor.consultation_fee|floatformat:0 }} fee (pay at consultation)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  // Reload available slots when the date changes.
+  document.getElementById('id_date').addEventListener('change', function () {
+    if (this.value) window.location.search = '?date=' + this.value;
+  });
+</script>
+{% endblock %}

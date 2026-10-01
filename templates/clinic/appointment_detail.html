@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load clinic_tags %}
+{% block title %}Appointment #{{ appt.pk }}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width: 960px">
+  <a href="{% url 'dashboard' %}" class="small text-decoration-none no-print"><i class="bi bi-arrow-left"></i> Dashboard</a>
+
+  <div class="card mt-2 mb-4 no-print">
+    <div class="card-body p-4">
+      <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start">
+        <div>
+          <div class="text-muted small">Appointment #{{ appt.pk }}</div>
+          <h1 class="h4 fw-bold mb-1">{{ appt.date|date:"l, d F Y" }} · {{ appt.time|time:"g:i A" }}</h1>
+          <span class="badge rounded-pill text-bg-{{ appt.status_color }}">{{ appt.get_status_display }}</span>
+          <span class="badge rounded-pill text-bg-light border ms-1">{{ appt.get_mode_display }}</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          {% if appt.meeting_link and appt.status == 'confirmed' %}
+            <a href="{{ appt.meeting_link }}" target="_blank" rel="noopener" class="btn btn-primary"><i class="bi bi-camera-video me-2"></i>Join video call</a>
+          {% endif %}
+          {% if user == appt.doctor.user %}
+            {% if appt.status == 'pending' %}
+              <form method="post" action="{% url 'appointment_action' appt.pk 'confirm' %}">{% csrf_token %}<button class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Confirm</button></form>
+              <form method="post" action="{% url 'appointment_action' appt.pk 'reject' %}">{% csrf_token %}<button class="btn btn-outline-danger">Reject</button></form>
+            {% elif appt.status == 'confirmed' or appt.status == 'completed' %}
+              <a href="{% url 'write_prescription' appt.pk %}" class="btn btn-outline-primary"><i class="bi bi-prescription2 me-1"></i>{% if prescription %}Edit prescription{% else %}Write prescription & complete{% endif %}</a>
+            {% endif %}
+          {% endif %}
+          {% if user == appt.patient.user and appt.is_active %}
+            <form method="post" action="{% url 'appointment_action' appt.pk 'cancel' %}" onsubmit="return confirm('Cancel this appointment?')">{% csrf_token %}
+              <button class="btn btn-outline-danger">Cancel appointment</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+      <hr>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="small text-muted text-uppercase fw-bold mb-2">Doctor</div>
+          <div class="d-flex gap-3 align-items-center">
+            <span class="avatar">{{ appt.doctor.user|initials }}</span>
+            <div><div class="fw-semibold">{{ appt.doctor }}</div><div class="small text-muted">{{ appt.doctor.specialization }} · {{ appt.doctor.qualification }}</div></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted text-uppercase fw-bold mb-2">Patient</div>
+          <div class="d-flex gap-3 align-items-center">
+            <span class="avatar">{{ appt.patient.user|initials }}</span>
+            <div>
+              <div class="fw-semibold">{{ appt.patient }}</div>
+              <div class="small text-muted">
+                {% if appt.patient.age is not None %}{{ appt.patient.age }} yrs{% endif %}
+                {% if appt.patient.gender %} · {{ appt.patient.get_gender_display }}{% endif %}
+                {% if appt.patient.blood_group %} · {{ appt.patient.blood_group }}{% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="small text-muted text-uppercase fw-bold mb-1">Symptoms / reason</div>
+          <p class="mb-0">{{ appt.symptoms|linebreaksbr }}</p>
+        </div>
+        {% if user == appt.doctor.user and appt.patient.medical_history %}
+        <div class="col-12">
+          <div class="small text-muted text-uppercase fw-bold mb-1">Medical history</div>
+          <p class="mb-0">{{ appt.patient.medical_history|linebreaksbr }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if prescription %}
+  <div class="rx-paper">
+    <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+      <div>
+        <div class="fw-bold fs-5 d-flex align-items-center gap-2"><span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span> E-Clinic</div>
+        <div class="small text-muted mt-1">{{ appt.doctor }} · {{ appt.doctor.qualification }}<br>{{ appt.doctor.specialization }}</div>
+      </div>
+      <div class="text-end small">
+        <div><strong>Date:</strong> {{ appt.date|date:"d M Y" }}</div>
+        <div><strong>Patient:</strong> {{ appt.patient }}</div>
+        {% if appt.patient.age is not None %}<div><strong>Age:</strong> {{ appt.patient.age }}</div>{% endif %}
+      </div>
+    </div>
+    <div class="mb-3"><strong>Diagnosis:</strong> {{ prescription.diagnosis|linebreaksbr }}</div>
+    <div class="rx-symbol mb-2">℞</div>
+    <ol class="mb-3">
+      {% for med in prescription.medicine_list %}<li class="mb-1">{{ med }}</li>{% endfor %}
+    </ol>
+    {% if prescription.advice %}<div class="mb-3"><strong>Advice:</strong><br>{{ prescription.advice|linebreaksbr }}</div>{% endif %}
+    {% if prescription.follow_up_date %}<div class="mb-3"><strong>Follow-up:</strong> {{ prescription.follow_up_date|date:"d M Y" }}</div>{% endif %}
+    <div class="d-flex justify-content-between align-items-end mt-4">
+      <button onclick="window.print()" class="btn btn-outline-primary no-print"><i class="bi bi-printer me-2"></i>Print / save as PDF</button>
+      <div class="text-end small text-muted">Digitally issued by<br><strong class="text-dark">{{ appt.doctor }}</strong></div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
