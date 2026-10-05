@@ -20,7 +20,7 @@ SPECIALIZATIONS = [
 ]
 
 DOCTORS = [
-    ('dr_sharma', 'Ananya', 'Sharma', 'General Physician', 'MBBS, MD (Internal Medicine)', 12, 400,
+    ('dr_sharma', 'Diya', 'Sharma', 'General Physician', 'MBBS, MD (Internal Medicine)', 12, 400,
      'Dr. Sharma has over a decade of experience treating acute and chronic conditions, with a focus on preventive care.'),
     ('dr_mehta', 'Rohan', 'Mehta', 'Cardiology', 'MBBS, MD, DM (Cardiology)', 15, 900,
      'Interventional cardiologist specialising in hypertension, heart failure and cardiac rehabilitation.'),
